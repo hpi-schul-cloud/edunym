@@ -1,1 +1,4 @@
 /.idea
+/bin
+config.js
+node_modules
