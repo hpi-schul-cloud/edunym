@@ -12,7 +12,7 @@ with ``id_token`` of a LTI Message as a body parameter and Edunym will:
 
 Creates a tool for rewriting URLs and receiving its messages
 
-Parameters: ``audTool`` and ``publicKey``
+Parameters: ``clientId`` and ``publicKey``
 
 ## Setup
 
@@ -31,3 +31,7 @@ Run ``yarn run dev``
 ## Test
 
 Run ``yarn run test``
+
+## Technical details
+
+This app in general works as a proxy. But it needs to break the security standard when messages from the tool to platform are intercepted. They can't be resigned with the tool's private key. It uses the platform's private key for this last mile security. The platform must set its own public key as the tool's public key. When intercepting the incoming message the proxy verifies the signature to ensure authenticity.
