@@ -19,11 +19,23 @@ router.post('/outgoing', async (req, res) => {
   const idToken = jwt.decode(req.body.id_token);
   // TODO: verify message
 
-  let user = await User.findOne({ idPlatform: idToken.sub, client: idToken.aud }, 'pseudonym');
-  if (!user) {
-    user = new User({ idPlatform: idToken.sub, client: idToken.aud });
-    user.save();
-  }
+  let user = null;
+  const key = { idPlatform: idToken.sub, client: idToken.aud };
+  do {
+    user = await User.findOne(key); // eslint-disable-line no-await-in-loop
+    if (!user) {
+      try {
+        user = new User(key);
+        await user.save(); // eslint-disable-line no-await-in-loop
+      } catch (error) {
+        if (error.code === 11000) {
+          user = null;
+        } else {
+          throw Error(error);
+        }
+      }
+    }
+  } while (!user);
   idToken.sub = user.idClient;
 
   // TODO: replace platform urls to edunym urls

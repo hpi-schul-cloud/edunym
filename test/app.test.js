@@ -32,17 +32,15 @@ describe('Edunym tests', () => {
       });
   }));
 
-  describe('404', () => {
-    it('shows a 404 page', () => new Promise((resolve) => {
-      chai.request(app)
-        .get('/path/to/nowhere')
-        .set('content-type', 'text/html')
-        .end((err, res) => {
-          assert.strictEqual(res.statusCode, 404);
-          resolve();
-        });
-    }));
-  });
+  it('shows a 404 page', () => new Promise((resolve) => {
+    chai.request(app)
+      .get('/path/to/nowhere')
+      .set('content-type', 'text/html')
+      .end((err, res) => {
+        assert.strictEqual(res.statusCode, 404);
+        resolve();
+      });
+  }));
 
   describe('Outgoing LTI', () => {
     const toolUrl = 'https://example.org/tool';
@@ -64,18 +62,90 @@ describe('Edunym tests', () => {
       'https://purl.imsglobal.org/spec/lti/claim/version': '1.3.0',
       'https://purl.imsglobal.org/spec/lti/claim/deployment_id': '1',
     };
+    const idTokenPattern = /<input name="id_token" value="(.*)">/;
 
-    it('submits to URL decoded tool_url', () => new Promise((resolve) => {
-      const message = defaultMessage;
+    const requestSub = (message, resolve) => {
       chai.request(app)
         .post(`/outgoing/?tool_url=${encodeURI(toolUrl)}`)
         .set('content-type', 'application/x-www-form-urlencoded')
         .send({ id_token: jwt.sign(message, config.platform.privateKey, { algorithm: 'RS256' }) })
         .end((err, res) => {
+          const ltiRequest = jwt.decode(idTokenPattern.exec(res.text)[1]);
+          resolve(ltiRequest.sub);
+        });
+    };
+
+    const randomString = (length) => {
+      let text = '';
+      const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      for (let i = 0; i < length; i += 1) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      }
+      return text;
+    };
+
+    it('submits to URL decoded tool_url', () => new Promise((resolve) => {
+      chai.request(app)
+        .post(`/outgoing/?tool_url=${encodeURI(toolUrl)}`)
+        .set('content-type', 'application/x-www-form-urlencoded')
+        .send({ id_token: jwt.sign(defaultMessage, config.platform.privateKey, { algorithm: 'RS256' }) })
+        .end((err, res) => {
           assert.strictEqual(res.statusCode, 200);
           assert.ok(res.text.includes(`action="${decodeURI(toolUrl)}"`));
           resolve();
         });
+    }));
+
+    it('creates client user ids corresponding to the platform user ids', () => new Promise((resolve) => {
+      const user1 = randomString(16);
+      const user2 = randomString(16);
+      Promise.all([
+        new Promise((resolveInner) => {
+          const message = JSON.parse(JSON.stringify(defaultMessage));
+          message.sub = user1;
+          requestSub(message, resolveInner);
+        }),
+        new Promise((resolveInner) => {
+          const message = JSON.parse(JSON.stringify(defaultMessage));
+          message.sub = user1;
+          requestSub(message, resolveInner);
+        }),
+        new Promise((resolveInner) => {
+          const message = JSON.parse(JSON.stringify(defaultMessage));
+          message.sub = user2;
+          requestSub(message, resolveInner);
+        }),
+      ]).then(([sub1, sub1Duplicate, sub2]) => {
+        assert.strictEqual(sub1, sub1Duplicate);
+        assert.ok(sub1 !== sub2);
+        resolve();
+      });
+    }));
+
+    it('creates different client user ids for different clients', () => new Promise((resolve) => {
+      const client1 = randomString(16);
+      const client2 = randomString(16);
+      Promise.all([
+        new Promise((resolveInner) => {
+          const message = JSON.parse(JSON.stringify(defaultMessage));
+          message.aud = client1;
+          requestSub(message, resolveInner);
+        }),
+        new Promise((resolveInner) => {
+          const message = JSON.parse(JSON.stringify(defaultMessage));
+          message.aud = client1;
+          requestSub(message, resolveInner);
+        }),
+        new Promise((resolveInner) => {
+          const message = JSON.parse(JSON.stringify(defaultMessage));
+          message.aud = client2;
+          requestSub(message, resolveInner);
+        }),
+      ]).then(([aud1, aud1Duplicate, aud2]) => {
+        assert.strictEqual(aud1, aud1Duplicate);
+        assert.ok(aud1 !== aud2);
+        resolve();
+      });
     }));
   });
 });
