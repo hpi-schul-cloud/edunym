@@ -26,7 +26,7 @@ router.post('/outgoing', async (req, res, next) => {
   if (!idToken.nonce) return next('No nonce included');
 
   let user = null;
-  const key = { idPlatform: idToken.sub, client: idToken.aud };
+  const key = { idPlatform: idToken.sub, audTool: idToken.aud };
   do {
     user = await User.findOne(key); // eslint-disable-line no-await-in-loop
     if (!user) {
@@ -42,7 +42,7 @@ router.post('/outgoing', async (req, res, next) => {
       }
     }
   } while (!user);
-  idToken.sub = user.idClient;
+  idToken.sub = user.idTool;
 
   // TODO: replace platform urls to edunym urls
 
