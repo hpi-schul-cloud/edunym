@@ -1,4 +1,5 @@
 const config = {
+  mongo: 'mongodb://127.0.0.1/edunym',
   platform: {
     publicKey: '-----BEGIN PUBLIC KEY-----\n' +
     'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1i1lcUZAcdsDxgpup5wT\n' +

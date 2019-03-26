@@ -1,9 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
+const debug = require('debug')('edunym:server');
+const config = require('../config.js');
+const User = require('../models/user.js');
 
 const router = express.Router();
-const config = require('../config.js');
 
 /* GET home page. */
 router.get('/', (req, res) => {
@@ -11,7 +12,7 @@ router.get('/', (req, res) => {
 });
 
 /* POST LTI Message */
-router.post('/outgoing', (req, res) => {
+router.post('/outgoing', async (req, res) => {
   if (!req.query.tool_url) throw new Error('Request query has no client_url.');
   if (!req.body.id_token) throw new Error('Request body has no id_token');
 
@@ -21,8 +22,12 @@ router.post('/outgoing', (req, res) => {
   const idToken = jwt.decode(req.body.id_token);
   // TODO: verify message
 
-  // TODO: replace pseudonym
-  idToken.sub = 'you have been pseudonymized';
+  let user = await User.findOne({ id: idToken.sub }, 'pseudonym');
+  if (!user) {
+    user = new User({ id: idToken.sub });
+    user.save();
+  }
+  idToken.sub = user.pseudonym;
 
   // TODO: replace platform urls to edunym urls
 

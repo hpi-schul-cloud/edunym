@@ -1,12 +1,11 @@
-'use strict';
-
 const assert = require('assert');
-const app = require('../app');
 const debug = require('debug')('edunym:server');
 const http = require('http');
 const chai = require('chai');
-const expect = chai.expect;
 const chaiHttp = require('chai-http');
+const app = require('../app');
+
+const expect = chai.expect;
 chai.use(chaiHttp);
 
 describe('Edunym tests', function () {
@@ -48,7 +47,7 @@ describe('Edunym tests', function () {
 	});
 
   describe('Outgoing LTI', function () {
-    const id_token = '';
+    const idToken = '';
     const toolUrl = 'https://example.org/tool';
 
     it('submits to URL decoded tool_url', function () {
@@ -56,7 +55,7 @@ describe('Edunym tests', function () {
         chai.request(app)
           .post(`/outgoing/?tool_url=${encodeURI(toolUrl)}`)
           .set('content-type', 'application/x-www-form-urlencoded')
-          .send({id_token})
+          .send({ id_token: idToken })
           .end((err, res) => {
             assert.strictEqual(res.statusCode, 200);
             assert.ok(res.text.includes(`action="${decodeURI(toolUrl)}"`));
