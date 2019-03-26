@@ -7,6 +7,12 @@ with ``id_token`` of a LTI Message as a body parameter and Edunym will:
  2. (Replace all urls ``URL`` within the Message with ``{EDUNYM_HOST}/ingoing/platform_url={URL}``)
  3. Resign the message with the platforms`s public key
  4. Send the LTI message to ``{TOOL_URL}``
+ 
+``POST /tool``
+
+Creates a tool for rewriting URLs and receiving its messages
+
+Parameters: ``audTool`` and ``publicKey``
 
 ## Setup
 

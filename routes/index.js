@@ -3,12 +3,28 @@ const jwt = require('jsonwebtoken');
 const debug = require('debug')('edunym:server');
 const config = require('../config.js');
 const User = require('../models/user.js');
+const Tool = require('../models/tool.js');
 
 const router = express.Router();
 
 /* GET home page. */
 router.get('/', (req, res) => {
   res.render('index', { title: 'Edunym' });
+});
+
+/* POST new client */
+router.post('/tool', async (req, res, next) => {
+  try {
+    const tool = new Tool(req.body);
+    await tool.save();
+  } catch (error) {
+    if (error.code === 11000) {
+      return next('Tool exists');
+    }
+    return next(error);
+  }
+
+  return res.send(`${req.body.audTool} created`);
 });
 
 /* POST LTI Message */
