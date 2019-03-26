@@ -12,12 +12,18 @@ router.get('/', (req, res) => {
 });
 
 /* POST LTI Message */
-router.post('/outgoing', async (req, res) => {
-  if (!req.query.tool_url) throw new Error('Request query has no client_url.');
-  if (!req.body.id_token) throw new Error('Request body has no id_token');
+router.post('/outgoing', async (req, res, next) => {
+  if (!req.query.tool_url) return next('Request query has no tool_url');
+  if (!req.body.id_token) return next('Request body has no id_token');
 
-  const idToken = jwt.decode(req.body.id_token);
-  // TODO: verify message
+  const idToken = jwt.verify(req.body.id_token,
+    config.platform.publicKey,
+    {
+      algorithm: 'RS256',
+      issuer: config.platform.host,
+      maxAge: 60,
+    });
+  if (!idToken.nonce) return next('No nonce included');
 
   let user = null;
   const key = { idPlatform: idToken.sub, client: idToken.aud };
@@ -31,7 +37,7 @@ router.post('/outgoing', async (req, res) => {
         if (error.code === 11000) {
           user = null;
         } else {
-          throw Error(error);
+          return next(error);
         }
       }
     }
@@ -40,7 +46,7 @@ router.post('/outgoing', async (req, res) => {
 
   // TODO: replace platform urls to edunym urls
 
-  res.render('lti', {
+  return res.render('lti', {
     url: decodeURI(req.query.tool_url),
     idToken: jwt.sign(idToken, config.platform.privateKey, { algorithm: 'RS256' }),
   });

@@ -84,6 +84,27 @@ describe('Edunym tests', () => {
       return text;
     };
 
+    it('fails without tool_url', () => new Promise((resolve) => {
+      chai.request(app)
+        .post('/outgoing/')
+        .set('content-type', 'application/x-www-form-urlencoded')
+        .send({ id_token: jwt.sign(defaultMessage, config.platform.privateKey, { algorithm: 'RS256' }) })
+        .end((err, res) => {
+          assert.strictEqual(res.statusCode, 500);
+          resolve();
+        });
+    }));
+
+    it('fails without id_token', () => new Promise((resolve) => {
+      chai.request(app)
+        .post(`/outgoing/?tool_url=${encodeURI(toolUrl)}`)
+        .set('content-type', 'application/x-www-form-urlencoded')
+        .end((err, res) => {
+          assert.strictEqual(res.statusCode, 500);
+          resolve();
+        });
+    }));
+
     it('submits to URL decoded tool_url', () => new Promise((resolve) => {
       chai.request(app)
         .post(`/outgoing/?tool_url=${encodeURI(toolUrl)}`)
