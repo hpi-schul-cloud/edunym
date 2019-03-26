@@ -16,18 +16,15 @@ router.post('/outgoing', async (req, res) => {
   if (!req.query.tool_url) throw new Error('Request query has no client_url.');
   if (!req.body.id_token) throw new Error('Request body has no id_token');
 
-  // TODO: create database
-  // database: client public key, pseudonyms
-
   const idToken = jwt.decode(req.body.id_token);
   // TODO: verify message
 
-  let user = await User.findOne({ id: idToken.sub }, 'pseudonym');
+  let user = await User.findOne({ idPlatform: idToken.sub, client: idToken.aud }, 'pseudonym');
   if (!user) {
-    user = new User({ id: idToken.sub });
+    user = new User({ idPlatform: idToken.sub, client: idToken.aud });
     user.save();
   }
-  idToken.sub = user.pseudonym;
+  idToken.sub = user.idClient;
 
   // TODO: replace platform urls to edunym urls
 

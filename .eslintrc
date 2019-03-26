@@ -2,6 +2,10 @@
   "extends": ["eslint:recommended", "airbnb"],
   "env": {
     "browser": true,
-    "node": true
-  }
+    "node": true,
+    "mocha": true
+  },
+  "plugins": [
+    "eslint-plugin-chai-expect"
+  ]
 }
