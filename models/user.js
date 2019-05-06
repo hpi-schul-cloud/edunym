@@ -2,13 +2,11 @@ const uuid = require('uuid');
 const mongoose = require('../dbConnect.js');
 
 const userSchema = new mongoose.Schema({
-  idPlatform: { type: String, required: true },
-  audTool: { type: String, required: true },
+  idPlatform: { type: String, required: true, index: true },
+  audTool: { type: String, required: true, index: true },
   idTool: { type: String, required: true, default: uuid },
 }, {
   timestamps: true,
 });
-
-userSchema.index({ idPlatform: 1, audTool: 1 }, { unique: true });
 
 module.exports = mongoose.model('User', userSchema);

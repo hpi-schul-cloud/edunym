@@ -8,11 +8,23 @@ with ``id_token`` of a LTI Message as a body parameter and Edunym will:
  3. Resign the message with the platforms`s public key
  4. Send the LTI message to ``{TOOL_URL}``
  
-``POST /tool``
+# Administration
+ 
+The proxy can be administrated through port PORT_ADMIN (default: 5001). This port must not be public.
+ 
+``GET /tools``
+
+Returns a list of existing tools
+ 
+``POST /tools``
 
 Creates a tool for rewriting URLs and receiving its messages
 
-Parameters: ``clientId`` and ``publicKey``
+Body parameters: ``clientId`` and ``publicKey``
+
+``DELETE /tools/{clientId}``
+
+Deletes the tool with the specified clientId
 
 ## Setup
 

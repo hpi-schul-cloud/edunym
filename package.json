@@ -1,6 +1,6 @@
 {
   "name": "edunym",
-  "description": "Stand-alone Proxy-Web-Service for LTI 1.3 Pseudonymization",
+  "description": "Stand-alone proxy web service for LTI 1.3 pseudonymization",
   "version": "1.0.0",
   "private": true,
   "scripts": {

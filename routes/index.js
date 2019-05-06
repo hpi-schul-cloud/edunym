@@ -89,6 +89,9 @@ router.post('/incoming', async (req, res, next) => {
       aud: config.platform.host,
       maxAge: 60,
     });
+
+  if (!idToken) return next('Verificiation failed');
+
   if (!idToken.nonce) return next('No nonce included');
 
   if (idToken.sub) {
