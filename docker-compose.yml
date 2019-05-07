@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+
+  edunym-mongo:
+    image: mongo:latest
+    volumes:
+      - data-edunym-db:/data/db
+    ports:
+      - 27018:27017
+
+  edunym:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+      - 5001:5001
+
+volumes:
+  data-edunym:
+  data-edunym-db:
