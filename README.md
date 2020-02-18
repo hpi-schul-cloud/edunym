@@ -1,5 +1,7 @@
 # Edunym
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/schul-cloud/edunym.svg)](https://greenkeeper.io/)
+
 ``POST /outgoing/?tool_url={TOOL_URL}``
 
 with ``id_token`` of a LTI Message as a body parameter and Edunym will:
